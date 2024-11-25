@@ -78,7 +78,7 @@
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>81</width>
+       <width>101</width>
        <height>21</height>
       </rect>
      </property>
@@ -88,13 +88,13 @@
       </font>
      </property>
      <property name="text">
-      <string>Username:</string>
+      <string>Employee ID:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>30</x>
        <y>80</y>
        <width>81</width>
        <height>21</height>
@@ -112,7 +112,7 @@
     <widget class="QLineEdit" name="lineEdit">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>110</x>
        <y>30</y>
        <width>381</width>
        <height>20</height>
@@ -122,7 +122,7 @@
     <widget class="QLineEdit" name="lineEdit_2">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>110</x>
        <y>80</y>
        <width>381</width>
        <height>20</height>
