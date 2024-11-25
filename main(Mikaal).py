@@ -16,10 +16,6 @@ if use_windows_authentication:
 else:
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
 
-connection = pyodbc.connect(connection_string)
-
-# Create a cursor to interact with the database
-cursor = connection.cursor()
 
 
 
@@ -27,8 +23,60 @@ class LoginPage(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoginPage, self).__init__()
         uic.loadUi("Login_Page.ui", self)
-        self.InsertOrder.clicked.connect(self.open_master_form)
+        self.pushButton.clicked.connect(self.check_login)
 
+
+        connection = pyodbc.connect(connection_string)
+        # Create a cursor to interact with the database
+        cursor = connection.cursor()
+        
+        select_query = "SELECT * FROM Employee"
+        cursor.execute(select_query)
+        print("All Employee:")
+        for row in cursor.fetchall():
+            print(row)
+
+        connection.close()
+
+    def check_login(self):
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+
+        select_query = "SELECT * FROM Employee"
+        cursor.execute(select_query)
+        print("All Employee:")
+
+        for row in cursor.fetchall():
+            print(row)
+
+        # Use parameterized queries to safely handle user input
+        i_username = int(self.lineEdit.text())
+        i_pass = self.lineEdit_2.text()
+
+        # Parameterized query to prevent SQL injection
+        select_query = """SELECT COUNT(*)
+                            FROM Employee E
+                            WHERE E.Emp_id = ? AND E.Password = ?"""
+        cursor.execute(select_query, (i_username, i_pass))
+
+
+        if cursor.fetchval() == (1):
+            select_query = """SELECT E.Designation
+                            FROM Employee E
+                            where E.Emp_id = ? and E.Password = ?
+                            """
+            cursor.execute(select_query, (i_username, i_pass))
+            if cursor.fetchval() == True:
+                print("OPS")
+                #show the ops screen
+            else:
+                print("HR")
+                #show the HR screen
+        else:
+            #pop up saying no such account
+            print("error")
+
+        connection.close()
 
 
 
