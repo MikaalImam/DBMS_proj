@@ -30,13 +30,13 @@ class LoginPage(QtWidgets.QMainWindow):
         # Create a cursor to interact with the database
         cursor = connection.cursor()
         
-        select_query = "SELECT * FROM Employee"
-        cursor.execute(select_query)
-        print("All Employee:")
-        for row in cursor.fetchall():
-            print(row)
+        # select_query = "SELECT * FROM Employee"
+        # cursor.execute(select_query)
+        # print("All Employee:")
+        # for row in cursor.fetchall():
+        #     print(row)
 
-        connection.close()
+        # connection.close()
 
     def check_login(self):
         connection = pyodbc.connect(connection_string)
@@ -69,6 +69,8 @@ class LoginPage(QtWidgets.QMainWindow):
             if cursor.fetchval() == True:
                 print("OPS")
                 #show the ops screen
+                self.ops_homepage = Ops_Homepage()
+                self.ops_homepage.show()
             else:
                 print("HR")
                 #show the HR screen
@@ -77,6 +79,23 @@ class LoginPage(QtWidgets.QMainWindow):
             print("error")
 
         connection.close()
+
+class Ops_Homepage(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Ops_Homepage, self).__init__()
+        uic.loadUi("ops_homepage.ui", self)
+        
+        self.pushButton.clicked.connect(self.Customer_managment)
+        self.pushButton_2.clicked.connect(self.Emp_schdule_managment)
+        
+
+    def Customer_managment(self):
+        print("cusomter")
+    
+    def Emp_schdule_managment(self):
+        print("emp scdule")
+            
+
 
 
 
