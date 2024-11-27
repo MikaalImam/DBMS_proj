@@ -72,6 +72,8 @@ class LoginPage(QtWidgets.QMainWindow):
                 #show the ops screen
                 self.ops_homepage = Ops_Homepage()
                 self.ops_homepage.show()
+                self.lineEdit.setText("")
+                self.lineEdit_2.setText("")
             else:
                 print("HR")
                 #show the HR screen
@@ -320,5 +322,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
