@@ -103,8 +103,10 @@ class Customer_table(QtWidgets.QMainWindow):
         super(Customer_table, self).__init__()
         uic.loadUi("Customer_table.ui", self)
 
-        self.pushButton_2.clicked.connect(self.add_customer)
         self.populate_table()
+        self.pushButton_2.clicked.connect(self.add_customer)
+        self.pushButton_3.clicked.connect(self.edit_cust)
+
 
 
     def populate_table(self):
@@ -136,8 +138,15 @@ class Customer_table(QtWidgets.QMainWindow):
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
 
     def add_customer(self):
+        self.close()
         self.add_cust = Add_Customer()
         self.add_cust.show()
+
+    def edit_cust(self):
+        self.close()
+        self.edit_cus = Edit_Customer()
+        self.edit_cus.show()
+
 
 class Add_Customer(QtWidgets.QMainWindow):
     def __init__(self):
@@ -171,8 +180,7 @@ class Add_Customer(QtWidgets.QMainWindow):
                         """
         cursor.execute(select_query,(comp_name))
 
-        if cursor.fetchval() == (1):
-            print("hello") 
+        if cursor.fetchval() == (1): 
             select_query = """
                         select C.Cus_ID
                         from Customers C
@@ -194,23 +202,52 @@ class Add_Customer(QtWidgets.QMainWindow):
             cursor.execute(select_query,(branch_name, gaurds_day, gaurds_night, i_empid, cus_id))
             connection.commit()
 
-            select_query = "SELECT * FROM Branch"
-            cursor.execute(select_query)
-            print("All Braches:")
-
-            for row in cursor.fetchall():
-                print(row)
-
         elif cursor.fetchval() == (None):
-            print("hi")
+            select_query = """
+                           insert into [Customers] ([Contact_name], [Contact_num], [Cus_name])
+                            values (?, ?, ?)
+                            declare @new_cus int
+                            set @new_cus  =  @@identity
+
+                            insert into Branch (Branch_name, NOG_D, NOG_N, Emp_id)
+                            values (?, ?, ?, ?)
+                            declare @new_branch int
+                            set @new_branch  =  @@identity
+                            
+                            insert into Cust_Branch (Cus_ID, Branc_ID)
+                            values (@new_cus, @new_branch)
+
+                            """
+            cursor.execute(select_query,(contact_name, contact_num, comp_name, branch_name, gaurds_day, gaurds_night, i_empid))
+            connection.commit()
 
         connection.close
 
+        self.close()
+
 
     def close_window(self):
-        print("ufuf")
+        self.close()
 
 
+class Edit_Customer(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Edit_Customer, self).__init__()
+        uic.loadUi("update_customer.ui", self)
+
+        self.lineEdit_6.setText(str(i_empid))
+        self.lineEdit_6.setDisabled(True)
+
+        self.pushButton_3.clicked.connect(self.close_window)
+        self.pushButton_4.clicked.connect(self.insert_edited_cus)
+        
+    def insert_edited_cus(self):
+        #need to do 
+        print("jfijfifj")
+
+
+    def close_window(self):
+        self.close()
 
 
 def main():
