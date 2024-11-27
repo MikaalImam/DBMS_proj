@@ -1,0 +1,27 @@
+# create procedure AddCustomerWithBranch
+# @ContactName varchar,
+# @ContactNum int,
+# @CusName varchar,
+# @BranchName varchar,
+# @NogD int,
+# @NogN int
+# as
+# begin
+# declare @CustomerId int
+# declare @BranchId int
+# insert into [Customers] ([Contact_name], [Contact_num], [Cus_name])
+# values (@ContactName, @ContactNum, @CusName select @CustomerId = [Cus_id] from [Customers])
+# where [Contact_name] @ContactName and [Contact_num] @ContactNum
+
+
+# insert into [Branch] ([branch_name], [nog_d], [nog_n])
+# values (@BranchName, @NogD, @NogN)
+# select @BranchId [branch_id] from [Branch]
+# where [branch_name] = @BranchName and [nog_d] @NogD and [nog_n] = @NogN
+# insert into [Cust_Branch] ([Cus_id], [Branc_ID])
+# values (@CustomerId, @BranchId)
+# print 'Customer and Branch added successfully'
+# end
+# --Example
+# exec AddCustomerWithBranch @ContactName John Doe, @ContactNum = 1234567890, @CusName Tech Innovators", @BranchName Karachi Branch @NogD 3,@NogN=2;
+

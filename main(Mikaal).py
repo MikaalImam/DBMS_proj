@@ -6,7 +6,7 @@ import sys
 import pyodbc
 
 server = 'MIKAALIMAM'
-database = 'Proj_db'  # Name of your Northwind database
+database = 'proj_db_rough'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 username = 'your_username'  # Specify a username if not using Windows Authentication
 password = 'your_password'  # Specify a password if not using Windows Authentication
@@ -112,12 +112,13 @@ class Customer_table(QtWidgets.QMainWindow):
         cursor = connection.cursor()
         select_query = """
                         select c.[Cus_name] as [Customer Name], c.[Cus_id] as [Customer_Id], b.[branch_name] as [Branch_Name],
-                             b. [branch_id] as [Branch_Id], c.[Contact_num] as [Contact_Number], 
-                             (b. [nog_d] + b. [nog_n]) as [Total_Guards]
-                        from [Customers] c left join [Branch] b on c. [Cus_id] = b. [branch_id]
+                                b. [branch_id] as [Branch_Id], c.[Contact_num] as [Contact_Number], 
+                                (b. [nog_d] + b. [nog_n]) as [Total_Guards]
+                        from Customers C join Cust_Branch CB on C.Cus_id = CB.Cus_ID join Branch B on CB.Branc_ID = B.Branch_id
                         order by c. [Cus_name], b. [branch_id]
                         """
         cursor.execute(select_query)
+
         for row_index, row_data in enumerate(cursor.fetchall()):
             self.tableWidget.insertRow(row_index)
             for col_index, cell_data in enumerate(row_data):
@@ -146,7 +147,7 @@ class Add_Customer(QtWidgets.QMainWindow):
         self.lineEdit_6.setText(str(i_empid))
         self.lineEdit_6.setDisabled(True)
 
-        self.pushButton_3.clicked.connect(self.insert_customer)
+        self.pushButton_3.clicked.connect(self.close_window)
         self.pushButton_4.clicked.connect(self.insert_customer)
         
 
@@ -164,40 +165,50 @@ class Add_Customer(QtWidgets.QMainWindow):
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
         select_query = """
-
+                        select count(*)
+                        from Customers C
+                        where C.Cus_name = ?
                         """
-        cursor.execute(select_query)
+        cursor.execute(select_query,(comp_name))
+
+        if cursor.fetchval() == (1):
+            print("hello") 
+            select_query = """
+                        select C.Cus_ID
+                        from Customers C
+                        where C.Cus_name = ?
+                            """
+            cursor.execute(select_query,(comp_name))
+            cus_id = cursor.fetchval()
+
+            select_query = """
+                            insert into Branch (Branch_name, NOG_D, NOG_N, Emp_id)
+                            values (?, ?, ?, ?)
+                            declare @new_branch int
+                            set @new_branch  =  @@identity
+                            
+                            insert into Cust_Branch (Cus_ID, Branc_ID)
+                            values (?, @new_branch)
+
+                            """
+            cursor.execute(select_query,(branch_name, gaurds_day, gaurds_night, i_empid, cus_id))
+            connection.commit()
+
+            select_query = "SELECT * FROM Branch"
+            cursor.execute(select_query)
+            print("All Braches:")
+
+            for row in cursor.fetchall():
+                print(row)
+
+        elif cursor.fetchval() == (None):
+            print("hi")
+
+        connection.close
 
 
     def close_window(self):
         print("ufuf")
-
-# create procedure AddCustomerWithBranch
-# @ContactName varchar,
-# @ContactNum int,
-# @CusName varchar,
-# @BranchName varchar,
-# @NogD int,
-# @NogN int
-# as
-# begin
-# declare @CustomerId int
-# declare @BranchId int
-# insert into [Customers] ([Contact_name], [Contact_num], [Cus_name])
-# values (@ContactName, @ContactNum, @CusName select @CustomerId = [Cus_id] from [Customers])
-# where [Contact_name] @ContactName and [Contact_num] @ContactNum
-
-
-# insert into [Branch] ([branch_name], [nog_d], [nog_n])
-# values (@BranchName, @NogD, @NogN)
-# select @BranchId [branch_id] from [Branch]
-# where [branch_name] = @BranchName and [nog_d] @NogD and [nog_n] = @NogN
-# insert into [Cust_Branch] ([Cus_id], [Branc_ID])
-# values (@CustomerId, @BranchId)
-# print 'Customer and Branch added successfully'
-# end
-# --Example
-# exec AddCustomerWithBranch @ContactName John Doe, @ContactNum = 1234567890, @CusName Tech Innovators", @BranchName Karachi Branch @NogD 3,@NogN=2;
 
 
 
