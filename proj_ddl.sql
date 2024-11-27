@@ -60,6 +60,7 @@ CREATE TABLE [Guard] (
 CREATE TABLE [Branch] (
 	[Branch_id] int IDENTITY(1,1) NOT NULL UNIQUE,
 	[Branch_name] nvarchar(max) NOT NULL,
+	[Address] nvarchar(max) NOT NULL,
 	[NOG_D] int NOT NULL,
 	[NOG_N] int NOT NULL,
 	[Emp_id] int NOT NULL,
@@ -122,12 +123,12 @@ VALUES
 (N'PKR-112233445', 1122334455667);  -- Guard 3 with CNIC 1122334455667
 
 -- Insert data into [Branch] table
-INSERT INTO [Branch] ([Branch_name], [NOG_D], [NOG_N], [Emp_id])
+INSERT INTO [Branch] ([Branch_name], [Address] , [NOG_D], [NOG_N], [Emp_id])
 VALUES 
-(N'Karachi Branch', 5, 3, 2), 
-(N'Lahore Branch', 4, 4, 2),  
-(N'Peshawar Branch', 2, 2, 2),  
-(N'Islamabad Branch', 6, 2, 2);  
+(N'Karachi Branch', 'yes street' , 5, 3, 2), 
+(N'Lahore Branch', 'mhmm street' ,4, 4, 2),  
+(N'Peshawar Branch', 'lol street',2, 2, 2),  
+(N'Islamabad Branch', 'boo street',6, 2, 2);  
 
 -- Insert data into [Cust_Branch] table
 INSERT INTO [Cust_Branch] ([Cus_ID], [Branc_ID])

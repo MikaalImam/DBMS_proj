@@ -6,7 +6,7 @@ import sys
 import pyodbc
 
 server = 'MIKAALIMAM'
-database = 'proj_db_rough'  # Name of your Northwind database
+database = 'proj_db_temp'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 username = 'your_username'  # Specify a username if not using Windows Authentication
 password = 'your_password'  # Specify a password if not using Windows Authentication
@@ -109,6 +109,7 @@ class Customer_table(QtWidgets.QMainWindow):
 
 
 
+
     def populate_table(self):
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
@@ -143,8 +144,11 @@ class Customer_table(QtWidgets.QMainWindow):
         self.add_cust.show()
 
     def edit_cust(self):
+        selected_row = self.tableWidget.currentRow()
+        cus_id  = self.tableWidget.item(selected_row,1).text()
+        branc_id = self.tableWidget.item(selected_row,3).text()
         self.close()
-        self.edit_cus = Edit_Customer()
+        self.edit_cus = Edit_Customer(cus_id, branc_id)
         self.edit_cus.show()
 
 
@@ -157,12 +161,10 @@ class Add_Customer(QtWidgets.QMainWindow):
         self.lineEdit_6.setDisabled(True)
 
         self.pushButton_3.clicked.connect(self.close_window)
-        self.pushButton_4.clicked.connect(self.insert_customer)
-        
+        self.pushButton_4.clicked.connect(self.insert_customer)        
 
 
     def insert_customer(self):
-        emp_resp = i_empid
         comp_name = self.lineEdit.text()
         branch_name = self.lineEdit_2.text()
         addy = self.lineEdit_3.text()
@@ -190,8 +192,8 @@ class Add_Customer(QtWidgets.QMainWindow):
             cus_id = cursor.fetchval()
 
             select_query = """
-                            insert into Branch (Branch_name, NOG_D, NOG_N, Emp_id)
-                            values (?, ?, ?, ?)
+                            insert into Branch (Branch_name, Address , NOG_D, NOG_N, Emp_id)
+                            values (?, ?, ?, ?, ?)
                             declare @new_branch int
                             set @new_branch  =  @@identity
                             
@@ -199,7 +201,7 @@ class Add_Customer(QtWidgets.QMainWindow):
                             values (?, @new_branch)
 
                             """
-            cursor.execute(select_query,(branch_name, gaurds_day, gaurds_night, i_empid, cus_id))
+            cursor.execute(select_query,(branch_name, addy, gaurds_day, gaurds_night, i_empid, cus_id))
             connection.commit()
 
         elif cursor.fetchval() == (None):
@@ -209,8 +211,8 @@ class Add_Customer(QtWidgets.QMainWindow):
                             declare @new_cus int
                             set @new_cus  =  @@identity
 
-                            insert into Branch (Branch_name, NOG_D, NOG_N, Emp_id)
-                            values (?, ?, ?, ?)
+                            insert into Branch (Branch_name, Address , NOG_D, NOG_N, Emp_id)
+                            values (?, ?, ?, ?, ?)
                             declare @new_branch int
                             set @new_branch  =  @@identity
                             
@@ -218,7 +220,7 @@ class Add_Customer(QtWidgets.QMainWindow):
                             values (@new_cus, @new_branch)
 
                             """
-            cursor.execute(select_query,(contact_name, contact_num, comp_name, branch_name, gaurds_day, gaurds_night, i_empid))
+            cursor.execute(select_query,(contact_name, contact_num, comp_name, branch_name, addy, gaurds_day, gaurds_night, i_empid))
             connection.commit()
 
         connection.close
@@ -231,20 +233,79 @@ class Add_Customer(QtWidgets.QMainWindow):
 
 
 class Edit_Customer(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, c_id, b_id):
         super(Edit_Customer, self).__init__()
         uic.loadUi("update_customer.ui", self)
+
+        self.c_id = c_id
+        self.b_id = b_id
+        
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+                    select c.[Cus_name] as [Customer Name], b.[branch_name] as [Branch_Name], B.Address as addy,
+                            c.[Contact_num] as [Contact_Number], C.Contact_name ,
+                            b. [nog_d] as gaurds_day , b. [nog_n] as gaurds_night
+                    from Customers C join Cust_Branch CB on C.Cus_id = CB.Cus_ID join Branch B on CB.Branc_ID = B.Branch_id
+                    where C.Cus_id = ? and B.branch_id = ?
+                    """
+        cursor.execute(select_query, (c_id, b_id))
+        
+        temp_tuple = cursor.fetchall()[0]
+
 
         self.lineEdit_6.setText(str(i_empid))
         self.lineEdit_6.setDisabled(True)
 
+        self.lineEdit.setText(str(temp_tuple[0]))
+        self.lineEdit_2.setText(str(temp_tuple[1]))
+        self.lineEdit_3.setText(str(temp_tuple[2]))
+        self.lineEdit_4.setText(str(temp_tuple[4]))
+        self.lineEdit_5.setText(str(temp_tuple[3]))
+        self.lineEdit_7.setText(str(temp_tuple[5]))
+        self.lineEdit_8.setText(str(temp_tuple[6]))
+
+
         self.pushButton_3.clicked.connect(self.close_window)
         self.pushButton_4.clicked.connect(self.insert_edited_cus)
+
+        connection.close()
         
     def insert_edited_cus(self):
-        #need to do 
-        print("jfijfifj")
+        comp_name = self.lineEdit.text()
+        branch_name = self.lineEdit_2.text()
+        addy = self.lineEdit_3.text()
+        contact_name = self.lineEdit_4.text()
+        contact_num = self.lineEdit_5.text()
+        gaurds_day = self.lineEdit_7.text()
+        gaurds_night = self.lineEdit_8.text()
 
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+
+
+        select_query = """
+                update [Customers]
+                set [Contact_name] = ?,
+                    [Contact_num] = ?,
+                    [Cus_name] = ?
+                where [Cus_id] = ?
+
+                update Branch 
+                set Branch_name = ?,
+                    Address = ?, 
+                    NOG_D = ?, 
+                    NOG_N = ?
+                where branch_id = ?
+                declare @new_branch int
+                set @new_branch  =  @@identity
+                """
+        cursor.execute(select_query,(contact_name, contact_num, comp_name, self.c_id, branch_name, addy, gaurds_day, gaurds_night, self.b_id))
+        connection.commit()
+
+        connection.close
+
+        self.close()
 
     def close_window(self):
         self.close()
