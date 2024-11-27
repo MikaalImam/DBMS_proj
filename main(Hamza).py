@@ -16,7 +16,7 @@ if use_windows_authentication:
 else:
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
 
-
+#ubudbudbu
 
 
 class LoginPage(QtWidgets.QMainWindow):
