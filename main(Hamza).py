@@ -112,34 +112,23 @@ class new_applicant(QtWidgets.QMainWindow):
         contact_num = self.lineEdit_4.text()
         emergency_num = self.lineEdit_5.text()
         address = self.lineEdit_6.text()
-        weight = self.lineEdit_7.text()
-        height = self.lineEdit_8.text()
-        dob = self.dateEdit.date()
+        weight = float(self.lineEdit_7.text())
+        height = float(self.lineEdit_8.text())
+        dob_qdate = self.dateEdit.date()
+        dob = dob_qdate.toString("yyyy-MM-dd")
         experience = self.comboBox.currentText()
-        
+        status = "Accepted" if self.radioButton.isChecked() else "Rejected"
+    
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
-        select_query = """
-                        create procedure Add applicant 
-                            @Cnic bigint, 
-                            @F_name varchar, 
-                            @L_name varchar, 
-                            @DOB date, 
-                            @Contact_num bigint, 
-                            @Emergency_num bigint, 
-                            @address varchar, 
-                            @weight float, 
-                            @height float, 
-                            @experience int, 
-                            @status bit, 
-                            @empid int 
-                        as 
-                        begin 
-                        insert into Application (CNIC, F_Name, L_Name, DOB, Contact_No, Emergency_No, Address, Weight, Height, Experience_in_years, Status) 
-                        values (@Cnic, @F_name, @L_name, @DOB, @Contact_num, @Emergency_num, @address, @weight, @height, @experience, @status) 
-                        insert into Emp_App(Emp_id, CNIC) values (@empid, @Cnic) 
-                        end
-                       """
+        insert_query = """
+                    INSERT INTO Application (CNIC, F_Name, L_Name, DOB, Contact_No, Emergency_No, Address, Weight, Height, Experience_in_years, Status) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   """
+    
+        cursor.execute(insert_query, (cnic, f_name, l_name, dob, contact_num, emergency_num, address, weight, height, experience, status))
+        connection.commit()
+
 
 def main():
     app = QApplication(sys.argv)
