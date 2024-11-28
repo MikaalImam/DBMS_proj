@@ -334,14 +334,14 @@ class Shift_Status(QtWidgets.QMainWindow):
                             end as shit_type, 
 
                             case 
-                            when S.Shift_D_N = 1 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_D then 'INCOMPLETE'
-                            when S.Shift_D_N = 0 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_N then 'INCOMPLETE'
+                            when S.Shift_D_N = 0 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_D then 'INCOMPLETE'
+                            when S.Shift_D_N = 1 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_N then 'INCOMPLETE'
                             else 'COMPLETE'
                             end as status, 
 
                             case
-                            when S.Shift_D_N = 1 then B.NOG_D - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)  
-                            when S.Shift_D_N = 0 then B.NOG_N - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)
+                            when S.Shift_D_N = 0 then B.NOG_D - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)  
+                            when S.Shift_D_N = 1 then B.NOG_N - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)
                             else 0
                             end as gaurds_needed 
                     from Shifts S join Branch B on S.branch_id = B.Branch_id
@@ -376,15 +376,25 @@ class Shift_Status(QtWidgets.QMainWindow):
         b_id = self.tableWidget.item(selected_row,5).text()
         self.view_shift_detail = View_shift(comp_name, branch_name, c_id, b_id, Shift_id) 
         self.view_shift_detail.show()
-        self.close()
 
     def assign_guards(self):
-        print("assign gaurds")
+        selected_row = self.tableWidget.currentRow()
+        Shift_id  = self.tableWidget.item(selected_row,0).text()
+        comp_name  = self.tableWidget.item(selected_row,2).text()
+        branch_name = self.tableWidget.item(selected_row,4).text()
+        c_id = self.tableWidget.item(selected_row,3).text()
+        b_id = self.tableWidget.item(selected_row,5).text()
+        self.assign_new_gaurds = Assign_gaurds(comp_name, branch_name, c_id, b_id, Shift_id)
+        self.assign_new_gaurds.show()
+        self.close()
 
 class View_shift(QtWidgets.QMainWindow):
     def __init__(self, comp_name, branch_name, c_id, b_id, s_id):
         super(View_shift, self).__init__()
         uic.loadUi("View_guards.ui", self)
+
+        self.pushButton_4.clicked.connect(self.close_window)
+
         
         self.shift_id = s_id
 
@@ -403,17 +413,36 @@ class View_shift(QtWidgets.QMainWindow):
                         """
         cursor.execute(select_query, (b_id))
 
+        temp_NOG = cursor.fetchall()[0]
+
+        select_query = """
+                        Select S.Shift_D_N
+                        from Shifts S
+                        where S.Shift_id = ?
+                        """
+        cursor.execute(select_query, (s_id))
+
         temp = cursor.fetchall()[0]
+        if (temp[0] == True):
+            self.lineEdit_7.setText(str("Night"))
+            self.lineEdit_7.setDisabled(True)
+            self.lineEdit_8.setText(str(temp_NOG[1]))
+            self.lineEdit_8.setDisabled(True)
+            
+        else:
+            self.lineEdit_7.setText(str("Day"))
+            self.lineEdit_7.setDisabled(True)
+            self.lineEdit_8.setText(str(temp_NOG[0]))
+            self.lineEdit_8.setDisabled(True)
+            
+
+
 
         connection.close()
 
-        self.lineEdit_7.setText(str(temp[0]))
-        self.lineEdit_7.setDisabled(True)
-        
-        self.lineEdit_8.setText(str(temp[1]))
-        self.lineEdit_8.setDisabled(True)
 
         self.populate_table()
+        
 
     def populate_table(self):
         connection = pyodbc.connect(connection_string)
@@ -448,6 +477,62 @@ class View_shift(QtWidgets.QMainWindow):
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
 
+    def close_window(self):
+        self.close()
+
+class Assign_gaurds(QtWidgets.QMainWindow):
+    def __init__(self, comp_name, branch_name, c_id, b_id, Shift_id):
+        super(Assign_gaurds, self).__init__()
+        uic.loadUi("Assign_gaurds.ui", self)
+
+        self.shift_id = Shift_id
+
+        self.lineEdit_10.setText(str(comp_name))
+        self.lineEdit_10.setDisabled(True)
+
+        self.lineEdit_9.setText(str(branch_name))
+        self.lineEdit_9.setDisabled(True)
+
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+                        select NOG_D, NOG_N
+                        from Branch B
+                        where B.Branch_id = ?
+                        """
+        cursor.execute(select_query, (b_id))
+
+        temp_NOG = cursor.fetchall()[0]
+
+        select_query = """
+                        Select S.Shift_D_N , S.Date
+                        from Shifts S
+                        where S.Shift_id = ?
+                        """
+        cursor.execute(select_query, (Shift_id))
+
+        temp = cursor.fetchall()[0]
+        if (temp[0] == True):
+            self.lineEdit_7.setText(str("Night"))
+            self.lineEdit_7.setDisabled(True)
+            self.lineEdit_12.setText(str(temp_NOG[1]))
+            self.lineEdit_12.setDisabled(True)
+            
+        else:
+            self.lineEdit_7.setText(str("Day"))
+            self.lineEdit_7.setDisabled(True)
+            self.lineEdit_12.setText(str(temp_NOG[0]))
+            self.lineEdit_12.setDisabled(True)
+            
+        self.lineEdit_11.setText(str(temp[1]))
+        self.lineEdit_11.setDisabled(True)
+
+        connection.close()
+
+
+
+
+    
 
 def main():
     app = QApplication(sys.argv)
