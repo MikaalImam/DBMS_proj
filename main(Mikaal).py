@@ -225,7 +225,8 @@ class Add_Customer(QtWidgets.QMainWindow):
             cursor.execute(select_query,(contact_name, contact_num, comp_name, branch_name, addy, gaurds_day, gaurds_night, i_empid))
             connection.commit()
 
-        connection.close
+        connection.close()
+
 
         self.close()
 
@@ -304,7 +305,7 @@ class Edit_Customer(QtWidgets.QMainWindow):
         cursor.execute(select_query,(contact_name, contact_num, comp_name, self.c_id, branch_name, addy, gaurds_day, gaurds_night, self.b_id))
         connection.commit()
 
-        connection.close
+        connection.close()
 
         self.close()
 
@@ -326,7 +327,7 @@ class Shift_Status(QtWidgets.QMainWindow):
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
         select_query = """
-                        select datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, 
+                        select datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, B.Branch_id, 
                             case 
                             when S.Shift_D_N = 0 then 'Day'
                             else 'Night'
@@ -362,18 +363,98 @@ class Shift_Status(QtWidgets.QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
 
     def view_shift(self):
         selected_row = self.tableWidget.currentRow()
         comp_name  = self.tableWidget.item(selected_row,1).text()
         branch_name = self.tableWidget.item(selected_row,3).text()
-
+        c_id = self.tableWidget.item(selected_row,2).text()
+        b_id = self.tableWidget.item(selected_row,4).text()
+        self.view_shift_detail = View_shift(comp_name, branch_name, c_id, b_id) 
+        self.view_shift_detail.show()
+        self.close()
 
     def assign_guards(self):
         print("assign gaurds")
+
+class View_shift(QtWidgets.QMainWindow):
+    def __init__(self, comp_name, branch_name, c_id, b_id):
+        super(View_shift, self).__init__()
+        uic.loadUi("View_guards.ui", self)
         
+        self.lineEdit_10.setText(str(comp_name))
+        self.lineEdit_10.setDisabled(True)
+
+        self.lineEdit_9.setText(str(branch_name))
+        self.lineEdit_9.setDisabled(True)
+
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+                        select NOG_D, NOG_N
+                        from Branch B
+                        where B.Branch_id = ?
+                        """
+        cursor.execute(select_query, (b_id))
+
+        temp = cursor.fetchall()[0]
+
+        connection.close()
+
+        self.lineEdit_7.setText(str(temp[0]))
+        self.lineEdit_7.setDisabled(True)
+        
+        self.lineEdit_8.setText(str(temp[1]))
+        self.lineEdit_8.setDisabled(True)
+
+        self.populate_table()
+
+    def populate_table(self):
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+                        select
+                        g. [Guard_id] as Guard_ID,
+                        a. [F_Name] ++ a. [L_Name] as Name,
+                        DateDiff(Year, a.DOB, getdate()) as Age,
+                        a. [Height] as Height,
+                        a. [Weight] as weight
+                        from
+                        Shifts s inner join [Shift_Guard] sg on s. [Shift_id] = sg. [Shift_id]
+                        inner join [Guard] g on sg. [Guard_id] = g. [Guard_id]
+                        inner join [Application] a on a.CNIC = g.CNIC
+                        where
+                        s. [Shift_id] = ? 
+                        """
+        cursor.execute(select_query)
+
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.tableWidget.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(str(cell_data))
+                self.tableWidget.setItem(row_index, col_index, item)
+
+        connection.close()
+        
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+
+        
+
+
+
+
+
+
         
 
 
