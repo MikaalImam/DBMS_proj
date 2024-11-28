@@ -1,12 +1,12 @@
 # Importing essential modules
-from PyQt6 import QtWidgets, uic
-from PyQt6.QtCore import QDate
-from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHeaderView
+from PyQt6 import QtWidgets, uic, QtCore
+from PyQt6.QtCore import QDate, Qt
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHeaderView, QAbstractItemView
 import sys
 import pyodbc
 
 server = 'MIKAALIMAM'
-database = 'proj_db_temp'  # Name of your Northwind database
+database = 'temp_proj'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 username = 'your_username'  # Specify a username if not using Windows Authentication
 password = 'your_password'  # Specify a password if not using Windows Authentication
@@ -317,11 +317,12 @@ class Shift_Status(QtWidgets.QMainWindow):
         super(Shift_Status, self).__init__()
         uic.loadUi("shift_table.ui", self)
 
+        self.tableWidget.setSortingEnabled(True)
+
         self.populate_table()
 
         self.pushButton_4.clicked.connect(self.view_shift)
         self.pushButton_3.clicked.connect(self.assign_guards)
-
 
     def populate_table(self):
         connection = pyodbc.connect(connection_string)
@@ -356,6 +357,8 @@ class Shift_Status(QtWidgets.QMainWindow):
                 item = QTableWidgetItem(str(cell_data))
                 self.tableWidget.setItem(row_index, col_index, item)
 
+        self.tableWidget.sortByColumn(1, QtCore.Qt.SortOrder.AscendingOrder)
+        
         connection.close()
         
         header = self.tableWidget.horizontalHeader()
@@ -374,7 +377,7 @@ class Shift_Status(QtWidgets.QMainWindow):
         branch_name = self.tableWidget.item(selected_row,4).text()
         c_id = self.tableWidget.item(selected_row,3).text()
         b_id = self.tableWidget.item(selected_row,5).text()
-        self.view_shift_detail = View_shift(comp_name, branch_name, c_id, b_id, Shift_id) 
+        self.view_shift_detail = View_shift(comp_name, branch_name, b_id, Shift_id) 
         self.view_shift_detail.show()
 
     def assign_guards(self):
@@ -382,16 +385,16 @@ class Shift_Status(QtWidgets.QMainWindow):
         Shift_id  = self.tableWidget.item(selected_row,0).text()
         comp_name  = self.tableWidget.item(selected_row,2).text()
         branch_name = self.tableWidget.item(selected_row,4).text()
-        c_id = self.tableWidget.item(selected_row,3).text()
         b_id = self.tableWidget.item(selected_row,5).text()
-        self.assign_new_gaurds = Assign_gaurds(comp_name, branch_name, c_id, b_id, Shift_id)
+        self.assign_new_gaurds = Assign_gaurds(comp_name, branch_name, b_id, Shift_id)
         self.assign_new_gaurds.show()
         self.close()
 
 class View_shift(QtWidgets.QMainWindow):
-    def __init__(self, comp_name, branch_name, c_id, b_id, s_id):
+    def __init__(self, comp_name, branch_name, b_id, s_id):
         super(View_shift, self).__init__()
         uic.loadUi("View_guards.ui", self)
+
 
         self.pushButton_4.clicked.connect(self.close_window)
 
@@ -468,6 +471,7 @@ class View_shift(QtWidgets.QMainWindow):
             for col_index, cell_data in enumerate(row_data):
                 item = QTableWidgetItem(str(cell_data))
                 self.tableWidget.setItem(row_index, col_index, item)
+        
 
         connection.close()
         
@@ -481,9 +485,20 @@ class View_shift(QtWidgets.QMainWindow):
         self.close()
 
 class Assign_gaurds(QtWidgets.QMainWindow):
-    def __init__(self, comp_name, branch_name, c_id, b_id, Shift_id):
+    def __init__(self, comp_name, branch_name, b_id, Shift_id):
         super(Assign_gaurds, self).__init__()
         uic.loadUi("Assign_gaurds.ui", self)
+
+        self.tableWidget.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+
+
+
+
+        self.pushButton_5.clicked.connect(self.assign_gaurds)
+        self.pushButton_6.clicked.connect(self.close_window)
+
+
 
         self.shift_id = Shift_id
 
@@ -512,16 +527,27 @@ class Assign_gaurds(QtWidgets.QMainWindow):
         cursor.execute(select_query, (Shift_id))
 
         temp = cursor.fetchall()[0]
+        self.shift_d_n = temp[0]
+        self.date = temp[1]
+
+        select_query = """
+                        (select count(Guard_id) 
+                        from Shift_Guard SG 
+                        where SG.Shift_id = ?)
+                        """
+        cursor.execute(select_query, (Shift_id))
+        num_g_current = cursor.fetchall()[0]
+
         if (temp[0] == True):
             self.lineEdit_7.setText(str("Night"))
             self.lineEdit_7.setDisabled(True)
-            self.lineEdit_12.setText(str(temp_NOG[1]))
+            self.lineEdit_12.setText(str(temp_NOG[1]-num_g_current[0]))
             self.lineEdit_12.setDisabled(True)
             
         else:
             self.lineEdit_7.setText(str("Day"))
             self.lineEdit_7.setDisabled(True)
-            self.lineEdit_12.setText(str(temp_NOG[0]))
+            self.lineEdit_12.setText(str(temp_NOG[0]-num_g_current[0]))
             self.lineEdit_12.setDisabled(True)
             
         self.lineEdit_11.setText(str(temp[1]))
@@ -529,10 +555,66 @@ class Assign_gaurds(QtWidgets.QMainWindow):
 
         connection.close()
 
+        self.populate_table()
+
+    def populate_table(self):
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+                    select G.Guard_id, A.F_Name + ' ' + A.L_Name as Name, DATEDIFF(YEAR, A.DOB, GETDATE()), Height, Weight
+                    from Guard G join Application A on G.CNIC = A.CNIC
+                    where G.Guard_id not in 
+                    (select SG.Guard_id from Shifts S join Shift_Guard SG on S.Shift_id = SG.Shift_id where S.Date = ? and S.Shift_D_N = ?)
+                        """
+        cursor.execute(select_query, (self.date, self.shift_d_n))
+
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.tableWidget.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(str(cell_data))
+                self.tableWidget.setItem(row_index, col_index, item)
+
+        connection.close()
+        
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+
+    def assign_gaurds(self):
+        # Get the selected rows
+        selected_rows = self.tableWidget.selectionModel().selectedRows()
+
+        # List to store selected row IDs (indices)
+        selected_row_ids = []
+
+        # Loop through selected rows and get the row index for each
+        for index in selected_rows:
+            selected_row_ids.append(index.row())  # Get the row index
+
+        # Print the selected row indices
+        print("Selected row indices:", selected_row_ids)
+
+        for index in selected_row_ids:
+            gaurd_id = (self.tableWidget.item(selected_row_ids[index],0).text())
+
+            connection = pyodbc.connect(connection_string)
+            cursor = connection.cursor()
+            select_query = """
+                            insert into Shift_Guard (Shift_id, Guard_id) values (?, ?)
+                            """
+            cursor.execute(select_query, (self.shift_id, gaurd_id))
+            connection.commit()
+
+            connection.close()
+
+        self.close()
 
 
+    def close_window(self):
+        self.close()    
 
-    
 
 def main():
     app = QApplication(sys.argv)

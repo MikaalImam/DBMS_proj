@@ -111,3 +111,8 @@ where G.Guard_id not in (select SG.Guard_id from Shifts S join Shift_Guard SG on
 
 insert into Shift_Guard (Shift_id, Guard_id) values (@shiftid, @guardid)
 end
+
+
+select G.Guard_id, A.F_Name + ' ' + A.L_Name as Name, DATEDIFF(YEAR, A.DOB, GETDATE()), Height, Weight
+from Guard G join Application A on G.CNIC = A.CNIC
+where G.Guard_id not in (select SG.Guard_id from Shifts S join Shift_Guard SG on S.Shift_id = SG.Shift_id where S.Date = @date and S.Shift_D_N = ?)
