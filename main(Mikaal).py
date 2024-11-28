@@ -327,16 +327,16 @@ class Shift_Status(QtWidgets.QMainWindow):
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
         select_query = """
-                        select datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, B.Branch_id, 
+                        select S.shift_id ,datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, B.Branch_id, 
                             case 
                             when S.Shift_D_N = 0 then 'Day'
                             else 'Night'
                             end as shit_type, 
 
                             case 
-                            when S.Shift_D_N = 1 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_D then 0
-                            when S.Shift_D_N = 0 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_N then 0
-                            else 1
+                            when S.Shift_D_N = 1 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_D then 'INCOMPLETE'
+                            when S.Shift_D_N = 0 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_N then 'INCOMPLETE'
+                            else 'COMPLETE'
                             end as status, 
 
                             case
@@ -369,11 +369,12 @@ class Shift_Status(QtWidgets.QMainWindow):
 
     def view_shift(self):
         selected_row = self.tableWidget.currentRow()
-        comp_name  = self.tableWidget.item(selected_row,1).text()
-        branch_name = self.tableWidget.item(selected_row,3).text()
-        c_id = self.tableWidget.item(selected_row,2).text()
-        b_id = self.tableWidget.item(selected_row,4).text()
-        self.view_shift_detail = View_shift(comp_name, branch_name, c_id, b_id) 
+        Shift_id  = self.tableWidget.item(selected_row,0).text()
+        comp_name  = self.tableWidget.item(selected_row,2).text()
+        branch_name = self.tableWidget.item(selected_row,4).text()
+        c_id = self.tableWidget.item(selected_row,3).text()
+        b_id = self.tableWidget.item(selected_row,5).text()
+        self.view_shift_detail = View_shift(comp_name, branch_name, c_id, b_id, Shift_id) 
         self.view_shift_detail.show()
         self.close()
 
@@ -381,10 +382,12 @@ class Shift_Status(QtWidgets.QMainWindow):
         print("assign gaurds")
 
 class View_shift(QtWidgets.QMainWindow):
-    def __init__(self, comp_name, branch_name, c_id, b_id):
+    def __init__(self, comp_name, branch_name, c_id, b_id, s_id):
         super(View_shift, self).__init__()
         uic.loadUi("View_guards.ui", self)
         
+        self.shift_id = s_id
+
         self.lineEdit_10.setText(str(comp_name))
         self.lineEdit_10.setDisabled(True)
 
@@ -429,7 +432,7 @@ class View_shift(QtWidgets.QMainWindow):
                         where
                         s. [Shift_id] = ? 
                         """
-        cursor.execute(select_query)
+        cursor.execute(select_query, (self.shift_id))
 
         for row_index, row_data in enumerate(cursor.fetchall()):
             self.tableWidget.insertRow(row_index)
@@ -440,23 +443,10 @@ class View_shift(QtWidgets.QMainWindow):
         connection.close()
         
         header = self.tableWidget.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
-
-        
-
-
-
-
-
-
-        
-
 
 
 def main():

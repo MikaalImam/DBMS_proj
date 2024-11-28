@@ -71,8 +71,8 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>240</y>
+      <x>180</x>
+      <y>280</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -83,13 +83,13 @@
      </font>
     </property>
     <property name="text">
-     <string>Gaurds needed</string>
+     <string>Gaurds needed:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>260</x>
       <y>240</y>
       <width>141</width>
       <height>21</height>
@@ -101,25 +101,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Day Shift: </string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>280</y>
-      <width>101</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Night Shift: </string>
+     <string>Shift:</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_8">
