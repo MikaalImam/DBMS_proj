@@ -52,6 +52,14 @@
     </attribute>
     <column>
      <property name="text">
+      <string>Shift ID</string>
+     </property>
+     <property name="textAlignment">
+      <set>AlignLeading|AlignVCenter</set>
+     </property>
+    </column>
+    <column>
+     <property name="text">
       <string>Day</string>
      </property>
      <property name="whatsThis">
@@ -60,10 +68,7 @@
     </column>
     <column>
      <property name="text">
-      <string>Company Name</string>
-     </property>
-     <property name="textAlignment">
-      <set>AlignLeading|AlignVCenter</set>
+      <string>Customer </string>
      </property>
     </column>
     <column>
