@@ -318,17 +318,26 @@ class Shift_Status(QtWidgets.QMainWindow):
 
         self.populate_table()
 
+        self.pushButton_4.clicked.connect(self.view_shift)
+        self.pushButton_3.clicked.connect(self.assign_guards)
+
+
     def populate_table(self):
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
         select_query = """
-                        select datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, S.Shift_D_N, 
+                        select datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, 
+                            case 
+                            when S.Shift_D_N = 0 then 'Day'
+                            else 'Night'
+                            end as shit_type, 
+
                             case 
                             when S.Shift_D_N = 1 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_D then 0
                             when S.Shift_D_N = 0 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_N then 0
                             else 1
                             end as status, 
-                            
+
                             case
                             when S.Shift_D_N = 1 then B.NOG_D - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)  
                             when S.Shift_D_N = 0 then B.NOG_N - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)
@@ -349,12 +358,21 @@ class Shift_Status(QtWidgets.QMainWindow):
         connection.close()
         
         header = self.tableWidget.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+
+    def view_shift(self):
+        selected_row = self.tableWidget.currentRow()
+        comp_name  = self.tableWidget.item(selected_row,1).text()
+        branch_name = self.tableWidget.item(selected_row,3).text()
+
+
+    def assign_guards(self):
+        print("assign gaurds")
         
         
 
