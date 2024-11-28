@@ -68,12 +68,17 @@
     </column>
     <column>
      <property name="text">
-      <string>ID</string>
+      <string>C ID</string>
      </property>
     </column>
     <column>
      <property name="text">
       <string>Branch</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>B ID</string>
      </property>
     </column>
     <column>
