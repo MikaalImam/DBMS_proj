@@ -90,7 +90,6 @@ class Ops_Homepage(QtWidgets.QMainWindow):
         
         self.pushButton.clicked.connect(self.Customer_managment)
         self.pushButton_2.clicked.connect(self.Emp_schdule_managment)
-        
 
     def Customer_managment(self):
         print("cusomter")
@@ -98,7 +97,9 @@ class Ops_Homepage(QtWidgets.QMainWindow):
         self.cust_table.show()
     
     def Emp_schdule_managment(self):
-        print("emp scdule")
+        print("shitfs")
+        self.shift_table = Shift_Status()
+        self.shift_table.show()
             
 class Customer_table(QtWidgets.QMainWindow):
     def __init__(self):
@@ -152,7 +153,6 @@ class Customer_table(QtWidgets.QMainWindow):
         self.close()
         self.edit_cus = Edit_Customer(cus_id, branc_id)
         self.edit_cus.show()
-
 
 class Add_Customer(QtWidgets.QMainWindow):
     def __init__(self):
@@ -233,7 +233,6 @@ class Add_Customer(QtWidgets.QMainWindow):
     def close_window(self):
         self.close()
 
-
 class Edit_Customer(QtWidgets.QMainWindow):
     def __init__(self, c_id, b_id):
         super(Edit_Customer, self).__init__()
@@ -311,6 +310,54 @@ class Edit_Customer(QtWidgets.QMainWindow):
 
     def close_window(self):
         self.close()
+
+class Shift_Status(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(Shift_Status, self).__init__()
+        uic.loadUi("shift_table.ui", self)
+
+        self.populate_table()
+
+    def populate_table(self):
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+                        select datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, S.Shift_D_N, 
+                            case 
+                            when S.Shift_D_N = 1 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_D then 0
+                            when S.Shift_D_N = 0 and (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id) < B.NOG_N then 0
+                            else 1
+                            end as status, 
+                            
+                            case
+                            when S.Shift_D_N = 1 then B.NOG_D - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)  
+                            when S.Shift_D_N = 0 then B.NOG_N - (select count(Guard_id) from Shift_Guard SG where SG.Shift_id = S.Shift_id)
+                            else 0
+                            end as gaurds_needed 
+                    from Shifts S join Branch B on S.branch_id = B.Branch_id
+                        join Cust_Branch CB on B.Branch_id = CB.Branc_ID
+                        join Customers C on CB.Cus_ID = C.Cus_id
+                        """
+        cursor.execute(select_query)
+
+        for row_index, row_data in enumerate(cursor.fetchall()):
+            self.tableWidget.insertRow(row_index)
+            for col_index, cell_data in enumerate(row_data):
+                item = QTableWidgetItem(str(cell_data))
+                self.tableWidget.setItem(row_index, col_index, item)
+
+        connection.close()
+        
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        
+        
+
 
 
 def main():
