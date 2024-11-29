@@ -52,6 +52,11 @@
     </attribute>
     <column>
      <property name="text">
+      <string>ID</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
       <string>Day</string>
      </property>
      <property name="whatsThis">
@@ -64,11 +69,6 @@
      </property>
      <property name="textAlignment">
       <set>AlignLeading|AlignVCenter</set>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>ID</string>
      </property>
     </column>
     <column>
