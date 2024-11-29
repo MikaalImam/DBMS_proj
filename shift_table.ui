@@ -59,9 +59,6 @@
      <property name="text">
       <string>Day</string>
      </property>
-     <property name="whatsThis">
-      <string/>
-     </property>
     </column>
     <column>
      <property name="text">
@@ -74,6 +71,14 @@
     <column>
      <property name="text">
       <string>Branch</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>B ID</string>
+     </property>
+     <property name="whatsThis">
+      <string/>
      </property>
     </column>
     <column>

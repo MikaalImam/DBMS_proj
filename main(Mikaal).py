@@ -96,6 +96,8 @@ class Ops_Homepage(QtWidgets.QMainWindow):
         
         self.pushButton.clicked.connect(self.Customer_managment)
         self.pushButton_2.clicked.connect(self.Emp_schdule_managment)
+        self.pushButton_3.clicked.connect(self.close_window)
+
 
     def Customer_managment(self):
         print("cusomter")
@@ -106,6 +108,11 @@ class Ops_Homepage(QtWidgets.QMainWindow):
         print("shitfs")
         self.shift_table = Shift_Status()
         self.shift_table.show()
+
+    def close_window(self):
+        self.close()    
+
+
             
 class Customer_table(QtWidgets.QMainWindow):
     def __init__(self):
@@ -348,7 +355,7 @@ class Shift_Status(QtWidgets.QMainWindow):
         connection = pyodbc.connect(connection_string)
         cursor = connection.cursor()
         select_query = """
-                        select S.shift_id ,datename(weekday, s.Date) as day, C.Cus_name, C.Cus_id, B.Branch_name, B.Branch_id, 
+                        select S.shift_id ,datename(weekday, s.Date) as day, C.Cus_name, B.Branch_name, B.Branch_id,
                             case 
                             when S.Shift_D_N = 0 then 'Day'
                             else 'Night'
@@ -389,14 +396,14 @@ class Shift_Status(QtWidgets.QMainWindow):
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)
 
     def view_shift(self):
         selected_row = self.tableWidget.currentRow()
         Shift_id  = self.tableWidget.item(selected_row,0).text()
         comp_name  = self.tableWidget.item(selected_row,2).text()
-        branch_name = self.tableWidget.item(selected_row,4).text()
-        c_id = self.tableWidget.item(selected_row,3).text()
-        b_id = self.tableWidget.item(selected_row,5).text()
+        branch_name = self.tableWidget.item(selected_row,3).text()
+        b_id = self.tableWidget.item(selected_row,4).text()
         self.view_shift_detail = View_shift(comp_name, branch_name, b_id, Shift_id) 
         self.view_shift_detail.show()
 
@@ -404,8 +411,8 @@ class Shift_Status(QtWidgets.QMainWindow):
         selected_row = self.tableWidget.currentRow()
         Shift_id  = self.tableWidget.item(selected_row,0).text()
         comp_name  = self.tableWidget.item(selected_row,2).text()
-        branch_name = self.tableWidget.item(selected_row,4).text()
-        b_id = self.tableWidget.item(selected_row,5).text()
+        branch_name = self.tableWidget.item(selected_row,3).text()
+        b_id = self.tableWidget.item(selected_row,4).text()
         self.assign_new_gaurds = Assign_gaurds(comp_name, branch_name, b_id, Shift_id)
         self.assign_new_gaurds.show()
         self.close()
