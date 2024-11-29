@@ -78,8 +78,14 @@ class LoginPage(QtWidgets.QMainWindow):
                 print("HR")
                 #show the HR screen
         else:
-            #pop up saying no such account
-            print("error")
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setWindowTitle("ERROR")
+            msgbox.setText("Employee ID or Password was Incorrect")
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+            msgbox.setIcon (QtWidgets.QMessageBox.Icon.Warning )   
+            msgbox.exec()    
+            self.lineEdit.setText("")
+            self.lineEdit_2.setText("")
 
         connection.close()
 
@@ -227,6 +233,13 @@ class Add_Customer(QtWidgets.QMainWindow):
 
         connection.close()
 
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("MESSAGE BOX")
+        msgbox.setText("New Customer Added Succesfully")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+        msgbox.exec()    
+
 
         self.close()
 
@@ -304,6 +317,13 @@ class Edit_Customer(QtWidgets.QMainWindow):
                 """
         cursor.execute(select_query,(contact_name, contact_num, comp_name, self.c_id, branch_name, addy, gaurds_day, gaurds_night, self.b_id))
         connection.commit()
+
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("MESSAGE BOX")
+        msgbox.setText("Customer Edited Succesfully")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+        msgbox.exec()    
 
         connection.close()
 
@@ -517,7 +537,7 @@ class Assign_gaurds(QtWidgets.QMainWindow):
                         """
         cursor.execute(select_query, (b_id))
 
-        temp_NOG = cursor.fetchall()[0]
+        self.temp_NOG = cursor.fetchall()[0]
 
         select_query = """
                         Select S.Shift_D_N , S.Date
@@ -536,19 +556,19 @@ class Assign_gaurds(QtWidgets.QMainWindow):
                         where SG.Shift_id = ?)
                         """
         cursor.execute(select_query, (Shift_id))
-        num_g_current = cursor.fetchall()[0]
+        self.num_g_current = cursor.fetchall()[0]
 
         if (temp[0] == True):
-            self.lineEdit_7.setText(str("Night"))
-            self.lineEdit_7.setDisabled(True)
-            self.lineEdit_12.setText(str(temp_NOG[1]-num_g_current[0]))
+            self.lineEdit_12.setText(str("Night"))
             self.lineEdit_12.setDisabled(True)
+            self.lineEdit_7.setText(str(self.temp_NOG[1]-self.num_g_current[0]))
+            self.lineEdit_7.setDisabled(True)
             
         else:
-            self.lineEdit_7.setText(str("Day"))
-            self.lineEdit_7.setDisabled(True)
-            self.lineEdit_12.setText(str(temp_NOG[0]-num_g_current[0]))
+            self.lineEdit_12.setText(str("Day"))
             self.lineEdit_12.setDisabled(True)
+            self.lineEdit_7.setText(str(self.temp_NOG[0]-self.num_g_current[0]))
+            self.lineEdit_7.setDisabled(True)
             
         self.lineEdit_11.setText(str(temp[1]))
         self.lineEdit_11.setDisabled(True)
@@ -595,21 +615,44 @@ class Assign_gaurds(QtWidgets.QMainWindow):
 
         # Print the selected row indices
         print("Selected row indices:", selected_row_ids)
+        print(len(selected_row_ids))
 
-        for index in selected_row_ids:
-            gaurd_id = (self.tableWidget.item(selected_row_ids[index],0).text())
+        if (self.shift_d_n == True):
+            i = 1
+        else: 
+            i = 0        
 
-            connection = pyodbc.connect(connection_string)
-            cursor = connection.cursor()
-            select_query = """
-                            insert into Shift_Guard (Shift_id, Guard_id) values (?, ?)
-                            """
-            cursor.execute(select_query, (self.shift_id, gaurd_id))
-            connection.commit()
+        if (len(selected_row_ids) > (self.temp_NOG[i]-self.num_g_current[0])):
+            msgbox = QtWidgets.QMessageBox(self)
+            msgbox.setWindowTitle("ERROR")
+            msgbox.setText("Assigning More gaurds than required to a shift")
+            msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+            msgbox.setIcon (QtWidgets.QMessageBox.Icon.Warning)   
+            msgbox.exec()    
+        else:
+            for index in selected_row_ids:
+                gaurd_id = (self.tableWidget.item(selected_row_ids[index],0).text())
 
-            connection.close()
+                connection = pyodbc.connect(connection_string)
+                cursor = connection.cursor()
+                select_query = """
+                                insert into Shift_Guard (Shift_id, Guard_id) values (?, ?)
+                                """
+                cursor.execute(select_query, (self.shift_id, gaurd_id))
+                connection.commit()
 
-        self.close()
+
+
+                msgbox = QtWidgets.QMessageBox(self)
+                msgbox.setWindowTitle("MESSAGE BOX")
+                msgbox.setText("Gaurds Assigned to shifts Succesfully")
+                msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+                msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+                msgbox.exec()    
+
+                connection.close()
+
+                self.close()
 
 
     def close_window(self):
