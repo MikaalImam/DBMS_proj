@@ -52,14 +52,6 @@
     </attribute>
     <column>
      <property name="text">
-      <string>Shift ID</string>
-     </property>
-     <property name="textAlignment">
-      <set>AlignLeading|AlignVCenter</set>
-     </property>
-    </column>
-    <column>
-     <property name="text">
       <string>Day</string>
      </property>
      <property name="whatsThis">
@@ -68,22 +60,20 @@
     </column>
     <column>
      <property name="text">
-      <string>Customer </string>
+      <string>Company Name</string>
+     </property>
+     <property name="textAlignment">
+      <set>AlignLeading|AlignVCenter</set>
      </property>
     </column>
     <column>
      <property name="text">
-      <string>C ID</string>
+      <string>ID</string>
      </property>
     </column>
     <column>
      <property name="text">
       <string>Branch</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>B ID</string>
      </property>
     </column>
     <column>
@@ -137,26 +127,6 @@
     <property name="text">
      <string>View Shift</string>
     </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox">
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>70</y>
-      <width>73</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <item>
-     <property name="text">
-      <string>Day</string>
-     </property>
-    </item>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
