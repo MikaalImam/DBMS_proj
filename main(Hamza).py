@@ -213,6 +213,7 @@ class update_g(QtWidgets.QMainWindow):
             self.lineEdit.setText(result.F_Name)  # First Name
             self.lineEdit_2.setText(result.L_Name)  # Last Name
             self.lineEdit_3.setText(str(result.CNIC))  # CNIC
+            self.lineEdit_3.setReadOnly(True)
             self.lineEdit_4.setText(str(result.Contact_No))  # Contact Number
             self.lineEdit_5.setText(str(result.Emergency_No))  # Emergency Number
             self.lineEdit_6.setText(result.Address)  # Address
