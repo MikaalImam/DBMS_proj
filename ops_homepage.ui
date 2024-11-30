@@ -29,7 +29,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Customer managment </string>
+     <string>Customer Managment </string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -65,7 +65,25 @@
      </font>
     </property>
     <property name="text">
-     <string>Guard schedule managment</string>
+     <string>Guard Shift Managment</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>320</y>
+      <width>81</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Log out</string>
     </property>
    </widget>
   </widget>
