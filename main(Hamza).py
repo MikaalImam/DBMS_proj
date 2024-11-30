@@ -80,7 +80,7 @@ class LoginPage(QtWidgets.QMainWindow):
         else:
             #pop up saying no such account
             print("error")
-
+        self.close()
         connection.close()
 
 class HR_Homepage(QtWidgets.QMainWindow):
@@ -108,7 +108,7 @@ class guard_table(QtWidgets.QMainWindow):
         self.populate_g_table()
         self.pushButton_3.clicked.connect(self.close)
         self.pushButton.clicked.connect(self.search_emp)
-        # self.pushButton_2.clicked.connect(self.update_emp)
+        self.pushButton_2.clicked.connect(self.update_emp)
         
     def populate_g_table(self):
         connection = pyodbc.connect(connection_string)
@@ -169,8 +169,104 @@ class guard_table(QtWidgets.QMainWindow):
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)        
     
-    # def update_emp(self):
-    #     end
+    def update_emp(self):
+        print("update")
+        selected_row = self.tableWidget.currentRow()
+        guard_id  = self.tableWidget.item(selected_row,0).text()
+        # name = self.tableWidget.item(selected_row,2).text()
+        # contact = self.tableWidget.item(selected_row,3).text()
+        # height = self.tableWidget.item(selected_row,4).text()
+        # weight = self.tableWidget.item(selected_row,5).text()
+        self.up_g = update_g(guard_id)
+        self.up_g.show()
+        
+class update_g(QtWidgets.QMainWindow):
+    def __init__(self, guard_id):
+        super(update_g, self).__init__()
+        uic.loadUi("Update gaurd .ui", self)
+        self.guard_id = guard_id
+        
+        self.pushButton_4.clicked.connect(self.update_it)
+        self.pushButton_3.clicked.connect(self.close)
+        
+        # Populate fields when the window opens
+        if self.guard_id:
+            self.populate_fields()
+    
+    def populate_fields(self):
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        select_query = """
+        SELECT A.F_Name, A.L_Name, A.CNIC, A.Contact_No, A.Emergency_No, 
+               A.Address, A.Weight, A.Height, A.DOB, A.Experience_in_years, 
+               A.Status, G.Bank_Account
+        FROM Guard G
+        JOIN Application A ON G.CNIC = A.CNIC
+        WHERE G.Guard_id = ?
+        """
+        
+        cursor.execute(select_query, (self.guard_id,))
+        result = cursor.fetchone()
+        
+        if result:
+            self.lineEdit_10.setText(self.guard_id)
+            self.lineEdit.setText(result.F_Name)  # First Name
+            self.lineEdit_2.setText(result.L_Name)  # Last Name
+            self.lineEdit_3.setText(str(result.CNIC))  # CNIC
+            self.lineEdit_4.setText(str(result.Contact_No))  # Contact Number
+            self.lineEdit_5.setText(str(result.Emergency_No))  # Emergency Number
+            self.lineEdit_6.setText(result.Address)  # Address
+            self.lineEdit_7.setText(str(result.Weight))  # Weight
+            self.lineEdit_8.setText(str(result.Height))  # Height
+            
+            # Set Date of Birth
+            dob = QDate.fromString(str(result.DOB), "yyyy-MM-dd")
+            self.dateEdit.setDate(dob)
+            
+            self.lineEdit_9.setText(str(result.Bank_Account))
+        
+        connection.close()
+    
+    def update_it(self):
+        connection = pyodbc.connect(connection_string)
+        cursor = connection.cursor()
+        
+        f_name = self.lineEdit.text()
+        l_name = self.lineEdit_2.text()
+        cnic = self.lineEdit_3.text()
+        contact_num = self.lineEdit_4.text()
+        emergency_num = self.lineEdit_5.text()
+        address = self.lineEdit_6.text()
+        weight = float(self.lineEdit_7.text())
+        height = float(self.lineEdit_8.text())
+        dob_qdate = self.dateEdit.date()
+        dob = dob_qdate.toString("yyyy-MM-dd")
+        bank_account = self.lineEdit_9.text()
+        
+        # Update Application table
+        update_application_query = """
+        UPDATE Application
+        SET F_Name = ?, L_Name = ?, DOB = ?, Contact_No = ?, 
+            Emergency_No = ?, Address = ?, Weight = ?, Height = ?
+        WHERE CNIC = ?
+        """
+        
+        # Update Guard table
+        update_guard_query = """
+        UPDATE Guard
+        SET Bank_Account = ?
+        WHERE CNIC = ?
+        """
+        
+        cursor.execute(update_application_query, (f_name, l_name, dob, contact_num, emergency_num, address, weight, height, cnic))
+            
+        cursor.execute(update_guard_query, (bank_account, cnic))
+            
+        connection.commit()
+        print("Update successful")
+        self.close()
+        connection.close()
+        
         
 class new_applicant(QtWidgets.QMainWindow):
     def __init__(self):
