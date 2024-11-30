@@ -61,6 +61,7 @@ class LoginPage(QtWidgets.QMainWindow):
 
 
         if cursor.fetchval() == (1):
+            LoginPage.current_emp_id = i_username
             select_query = """SELECT E.Designation
                             FROM Employee E
                             where E.Emp_id = ? and E.Password = ?
@@ -179,6 +180,7 @@ class new_applicant(QtWidgets.QMainWindow):
         self.pushButton_4.clicked.connect(self.insert_applicant)
         
     def insert_applicant(self, i_username):
+        i_username = LoginPage.current_emp_id
         f_name = self.lineEdit.text()
         l_name = self.lineEdit_2.text()
         cnic = self.lineEdit_3.text()
@@ -212,8 +214,8 @@ class new_applicant(QtWidgets.QMainWindow):
         # Insert into the Guard table if status is 1
         if status == 1:
             insert_guard_query = """
-                                 INSERT INTO Guard (CNIC, BankAccount)
-                                 VALUES (?, NULL)
+                                 INSERT INTO Guard (Bank_Account, CNIC)
+                                 VALUES (0, ?)
                                  """
             cursor.execute(insert_guard_query, (cnic,))
 
