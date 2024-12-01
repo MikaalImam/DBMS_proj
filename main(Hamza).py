@@ -273,6 +273,13 @@ class update_g(QtWidgets.QMainWindow):
         self.close()
         connection.close()
         
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("MESSAGE BOX")
+        msgbox.setText("Guard Information updated Succesfully")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+        msgbox.exec()
+        
         
 class new_applicant(QtWidgets.QMainWindow):
     def __init__(self):
@@ -321,7 +328,18 @@ class new_applicant(QtWidgets.QMainWindow):
                                  """
             cursor.execute(insert_guard_query, (cnic,))
 
-            connection.commit()
+        connection.commit()
+        print("added successfully")
+        self.close()
+        connection.close()
+        
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("MESSAGE BOX")
+        msgbox.setText("New Applicant Added Succesfully")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+        msgbox.exec()
+            
 
 
 
