@@ -83,6 +83,8 @@ class LoginPage(QtWidgets.QMainWindow):
                 #show the HR screen
                 self.hr_homepage = HR_Homepage()
                 self.hr_homepage.show()
+                self.lineEdit.setText("")
+                self.lineEdit_2.setText("")
         else:
             msgbox = QtWidgets.QMessageBox(self)
             msgbox.setWindowTitle("ERROR")
@@ -92,7 +94,6 @@ class LoginPage(QtWidgets.QMainWindow):
             msgbox.exec()    
             self.lineEdit.setText("")
             self.lineEdit_2.setText("")
-        self.close()
         connection.close()
 
 class HR_Homepage(QtWidgets.QMainWindow):
@@ -102,6 +103,7 @@ class HR_Homepage(QtWidgets.QMainWindow):
         
         self.pushButton.clicked.connect(self.applicant_management)
         self.pushButton_2.clicked.connect(self.Emp_management)
+        self.pushButton_3.clicked.connect(self.close_window)
         
     def applicant_management(self):
         print("applicant")
@@ -112,6 +114,9 @@ class HR_Homepage(QtWidgets.QMainWindow):
         print("Employees")
         self.g_table = guard_table()
         self.g_table.show()
+    
+    def close_window(self):
+        self.close()   
         
 class guard_table(QtWidgets.QMainWindow):
     def __init__(self):
@@ -222,6 +227,7 @@ class update_g(QtWidgets.QMainWindow):
         
         if result:
             self.lineEdit_10.setText(self.guard_id)
+            self.lineEdit_10.setReadOnly(True)
             self.lineEdit.setText(result.F_Name)  # First Name
             self.lineEdit_2.setText(result.L_Name)  # Last Name
             self.lineEdit_3.setText(str(result.CNIC))  # CNIC
@@ -279,7 +285,14 @@ class update_g(QtWidgets.QMainWindow):
         print("Update successful")
         self.close()
         connection.close()
-              
+        
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("MESSAGE BOX")
+        msgbox.setText("Guard Information updated Succesfully")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+        msgbox.exec()
+           
 class new_applicant(QtWidgets.QMainWindow):
     def __init__(self):
         super(new_applicant, self).__init__()
@@ -327,8 +340,18 @@ class new_applicant(QtWidgets.QMainWindow):
                                  """
             cursor.execute(insert_guard_query, (cnic,))
 
-            connection.commit()
-
+        connection.commit()
+        print("added successfully")
+        self.close()
+        connection.close()
+        
+        msgbox = QtWidgets.QMessageBox(self)
+        msgbox.setWindowTitle("MESSAGE BOX")
+        msgbox.setText("New Applicant Added Succesfully")
+        msgbox.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msgbox.setIcon (QtWidgets.QMessageBox.Icon.Information)   
+        msgbox.exec()
+            
 class Ops_Homepage(QtWidgets.QMainWindow):
     def __init__(self):
         super(Ops_Homepage, self).__init__()
