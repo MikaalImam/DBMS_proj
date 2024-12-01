@@ -90,6 +90,7 @@ class HR_Homepage(QtWidgets.QMainWindow):
         
         self.pushButton.clicked.connect(self.applicant_management)
         self.pushButton_2.clicked.connect(self.Emp_management)
+        self.pushButton_3.clicked.connect(self.close_window)
         
     def applicant_management(self):
         print("applicant")
@@ -100,6 +101,9 @@ class HR_Homepage(QtWidgets.QMainWindow):
         print("Employees")
         self.g_table = guard_table()
         self.g_table.show()
+    
+    def close_window(self):
+        self.close()   
         
 class guard_table(QtWidgets.QMainWindow):
     def __init__(self):
