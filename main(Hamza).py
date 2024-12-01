@@ -210,6 +210,7 @@ class update_g(QtWidgets.QMainWindow):
         
         if result:
             self.lineEdit_10.setText(self.guard_id)
+            self.lineEdit_10.setReadOnly(True)
             self.lineEdit.setText(result.F_Name)  # First Name
             self.lineEdit_2.setText(result.L_Name)  # Last Name
             self.lineEdit_3.setText(str(result.CNIC))  # CNIC
