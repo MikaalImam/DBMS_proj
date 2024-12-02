@@ -187,7 +187,7 @@ VALUES
 (cast('2024-11-18' as date), 1, 2, 3),   
 (cast('2024-11-19' as date), 1, 2, 2), 
 (cast('2024-11-19' as date), 1, 2, 4); 
---(cast('2024-11-19' as date), 1, 2, 4); 
+
 
 
 -- Insert data into [Shift-Guard] table
