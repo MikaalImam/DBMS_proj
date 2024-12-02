@@ -476,6 +476,24 @@ class Add_Customer(QtWidgets.QMainWindow):
                             insert into Cust_Branch (Cus_ID, Branc_ID)
                             values (?, @new_branch)
 
+                            INSERT INTO [Shifts] ([Date], [Shift_D_N], [Emp_id], [branch_id])
+                            VALUES
+                            (cast('2024-12-1' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-2' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-3' as date), 1, 2, @new_branch),
+                            (cast('2024-12-4' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-5' as date), 1, 2, @new_branch),   
+                            (cast('2024-12-6' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-7' as date), 1, 2, @new_branch),
+                            (cast('2024-12-1' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-2' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-3' as date), 0, 2, @new_branch),
+                            (cast('2024-12-4' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-5' as date), 0, 2, @new_branch),   
+                            (cast('2024-12-6' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-7' as date), 0, 2, @new_branch);
+
+
                             """
             cursor.execute(select_query,(branch_name, addy, gaurds_day, gaurds_night, i_empid, cus_id))
             connection.commit()
@@ -494,6 +512,23 @@ class Add_Customer(QtWidgets.QMainWindow):
                             
                             insert into Cust_Branch (Cus_ID, Branc_ID)
                             values (@new_cus, @new_branch)
+
+                            INSERT INTO [Shifts] ([Date], [Shift_D_N], [Emp_id], [branch_id])
+                            VALUES
+                            (cast('2024-12-1' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-2' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-3' as date), 1, 2, @new_branch),
+                            (cast('2024-12-4' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-5' as date), 1, 2, @new_branch),   
+                            (cast('2024-12-6' as date), 1, 2, @new_branch), 
+                            (cast('2024-12-7' as date), 1, 2, @new_branch),
+                            (cast('2024-12-1' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-2' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-3' as date), 0, 2, @new_branch),
+                            (cast('2024-12-4' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-5' as date), 0, 2, @new_branch),   
+                            (cast('2024-12-6' as date), 0, 2, @new_branch), 
+                            (cast('2024-12-7' as date), 0, 2, @new_branch);
 
                             """
             cursor.execute(select_query,(contact_name, contact_num, comp_name, branch_name, addy, gaurds_day, gaurds_night, i_empid))
