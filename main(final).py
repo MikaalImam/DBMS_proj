@@ -6,7 +6,7 @@ import sys
 import pyodbc
 
 server = 'MIKAALIMAM'
-database = 'proj_final'  # Name of your Northwind database
+database = 'temp_proj'  # Name of your Northwind database
 use_windows_authentication = True  # Set to True to use Windows Authentication
 username = 'your_username'  # Specify a username if not using Windows Authentication
 password = 'your_password'  # Specify a password if not using Windows Authentication
@@ -899,7 +899,10 @@ class Assign_gaurds(QtWidgets.QMainWindow):
             msgbox.exec()    
         else:
             for index in selected_row_ids:
-                gaurd_id = (self.tableWidget.item(selected_row_ids[index],0).text())
+                if (len(selected_row_ids)) == 1:
+                    gaurd_id = (self.tableWidget.item(selected_row_ids[0],0).text())
+                else:
+                    gaurd_id = (self.tableWidget.item(selected_row_ids[index],0).text())
 
                 connection = pyodbc.connect(connection_string)
                 cursor = connection.cursor()
